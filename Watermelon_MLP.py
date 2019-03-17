@@ -15,12 +15,12 @@ q=4 #number of hidden neurons
 l=3 #number of output neurons
 Eta=0.01 #learning rate
 X=numpy.zeros((1,d)) #input neurons
-V=numpy.ones((d,q)) #input weight
+V=numpy.ones((d+1,q)) #input weight
 H=numpy.zeros((1,q)) #input of hidden neurons
 Theta=numpy.zeros((1,q)) #hidden neurons threshold
-HT=numpy.zeros((1,q)) #hidden neurons output
+HT=numpy.ones((1,q+1)) #hidden neurons output
 E=numpy.zeros((1,q)) #coefficients of backward from hidden units
-W=numpy.ones((q,l)) #hidden units weight
+W=numpy.ones((q+1,l)) #hidden units weight
 YI=numpy.zeros((1,l)) #input of output neurons
 Gamma=numpy.zeros((1,l)) #output neurons threshold
 YP=numpy.zeros((len(D1),l)) #output neurons
@@ -38,22 +38,22 @@ for i in W:
     i=random.uniform(0,10)
 # train MLP
 i0=1
-while i0<10000 :
+while i0<100000 :
     for k in range(len(D1)):
         for j in range(q):
-            H[0,j]=D1[k]*V[0,j]+D2[k]*V[1,j]
+            H[0,j]=D1[k]*V[0,j]+D2[k]*V[1,j]+V[2,j]
             HT[0,j]=1/(1+numpy.exp(Theta[0,j]-H[0,j]))
         Error[0,k]=0
         for i in range(l):
             YI[0,i]=0
-            for j in range(q):
+            for j in range(q+1):
                 YI[0,i]=YI[0,i]+W[j,i]*HT[0,j]
             YP[k,i]=1/(1+numpy.exp(Gamma[0,i]-YI[0,i]))
             g[0,i]=YP[k,i]*(1-YP[k,i])*(YT[k]-YP[k,i])
             Error[0,k]=Error[0,k]+(YT[k]-YP[k,i])*(YT[k]-YP[k,i])/l
         for i in range(l):
-            for j in range(q):
-                W[j,i]=W[j,i]+Eta*g[0,i]*H[0,j]
+            for j in range(q+1):
+                W[j,i]=W[j,i]+Eta*g[0,i]*HT[0,j]
         for i in range(l):
             Gamma[0,i]=Gamma[0,i]-Eta*g[0,i]
         for j in range(q):
@@ -65,7 +65,6 @@ while i0<10000 :
             V[1,j]=V[1,j]+Eta*E[0,j]*D2[k]
             Theta[0,j]=Theta[0,j]-Eta*E[0,j]
     print(numpy.mean(Error))
-    Eta=0.001+0.02*0.9**(i//500)*random.random()
     i0=i0+1
 YP=numpy.mean(YP,1)
 plt.plot(YT)
